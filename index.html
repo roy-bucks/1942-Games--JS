@@ -1,0 +1,234 @@
+<html>
+	<head>
+		<title>1942 Game</title>
+		<style type="text/css">
+			body{
+				background-color:black;
+				background: url("background.png");
+				background-size: contain;
+				background-position: center;
+			}
+			#container{
+				width:1000px;
+				height:550px;
+			}
+			#hero{
+				background: url('1942.gif');
+				background-position: -85px -180px;
+				width:28px;
+				height:28px;
+				position:fixed;
+			}
+			.enemy{
+				background: url('1942.gif');
+				background-position: -30px -10px;
+				width:28px;
+				height:28px;
+				position:fixed;
+			}
+			
+			.enemy2{
+				background: url('1942.gif');
+				background-position: -95px 330px;
+				width:28px;
+				height:28px;
+				position:fixed;
+			}
+			.explode{
+				background: url('explode.gif');
+				background-position:center;
+				background-size: contain;
+				width:28px;
+				height:28px;
+				position:fixed;
+			}
+			.bullet{
+				background: url('1942.gif');
+				background-position: -185px -400px;
+				width:18px;
+				height:18px;
+				position:fixed;
+			}
+			#score{
+				border: 1px solid white;
+				width: 100px;
+				height: 75px;
+				color: white;
+				padding: 7px;
+				text-align: center;
+				position: absolute;
+				top: 20px;
+				left: 1220px;
+				font-size: 50px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id='container'>
+			<div id='hero'></div>
+			<div id='enemies'></div>
+			<div id='bullets'></div>	
+			<div id='explode'></div>
+		</div>
+
+		<div id = 'score'>0</div>
+
+
+		<script>
+					
+
+			//(Easy) Change the background of the game
+			//(Easy) Get the hero to move up and down
+			//Easy) Get 7 enemies to show up instead of 4 at a time
+			//(Intermediate) Get another type of enemy airplane to show up
+			//(Advanced) Collision Detection for the airplanes – when the hero collides with the enemy, have your score go down by 500.
+			//(Advanced) Collision Detection for the bullet – Have the score go up by 10 when an enemy is struck down.
+			//(Advanced) Get the enemy to explode when it is hit
+			//(Advanced) When the bullet hits, make a sound.
+	
+				var hero = {
+					 x: 650,
+					 y: 500
+				};
+
+				var enemy = [
+					{x: 100, y: 100},
+					{x: 200, y: 450},
+					{x: 300, y: 500},
+					{x: 400, y: 150},
+					{x: 500, y: 300},
+					{x: 600, y: 400},
+					{x: 700, y: 350}
+				];
+				var bullets = [];
+				var explode = [];
+				var score =0;
+				var audioExplode = new Audio('explode.mp3');
+				var audioBullet = new Audio('bullet.wav');
+				var audioCollide = new Audio('collide.mp3');
+			
+
+				function displayHero(){
+					document.getElementById("hero").style.top = hero.y + "px";
+					document.getElementById("hero").style.left = hero.x + "px";
+				}
+
+				function displayExplode(){
+					var output = " ";
+					for(var i=0; i<explode.length; i++){
+						output = output + "<div class = 'explode' style = 'top:" +(explode[i].y)+ "px; left:" +(explode[i].x)+ "px;'></div>";
+							document.getElementById("explode").innerHTML = output;
+							explode.pop();
+					 }
+				}
+
+				function displayEnemies(){
+					var output = "";
+					for(var i=0; i<enemy.length; i++){
+						if(i==enemy.length-1){
+							output = output + "<div class = 'enemy2' style = 'top:" +enemy[i].y+ "px; left:" +enemy[i].x+ "px;'></div>"
+						}
+						else{
+							output = output + "<div class = 'enemy' style = 'top:" +enemy[i].y+ "px; left:" +enemy[i].x+"px;'></div>"
+						}
+					}
+					document.getElementById("enemies").innerHTML = output;
+				}
+				
+				function enemyMove(){
+					for(var i=0; i<enemy.length; i++){
+						enemy[i].y+= 20;     
+						if(enemy[i].y>700){
+							enemy[i].y = 0;
+							enemy[i].x =  Math.floor(Math.random()*1100)+100;
+							displayEnemies();
+						}
+					}
+				}
+				
+				function bulletsMove(){
+					for(var i=0; i<bullets.length; i++){
+						bullets[i].y-= 20;
+						if(bullets[i].y < 200){
+							bullets[i] = bullets[bullets.length-1];
+							bullets.pop();
+						}
+					}
+				}
+				
+				function displayBullets(){
+					var output = "";
+					for(var i=0; i<bullets.length; i++){
+						output = output + "<div class = 'bullet' style = 'top:" +(bullets[i].y-15)+ "px; left:" +(bullets[i].x+5)+ "px;'></div>";
+					}
+					document.getElementById("bullets").innerHTML = output;
+				}
+
+
+				function gameLoop(){
+					displayExplode();
+					enemyMove();
+					displayHero();
+					displayEnemies();
+					bulletsMove()
+					displayBullets();
+					detectCollision();
+
+				}
+				
+				window.setInterval(gameLoop, 120);
+				function detectCollision(){
+					
+
+						for(var j=0; j<enemy.length; j++){
+							if(Math.abs(hero.x - enemy[j].x) <15 && Math.abs(hero.y - enemy[j].y)<15){
+								score = score - 500;
+								audioCollide.play();
+								//if(score<0){
+								//	score =0;
+								//}
+								document.getElementById("score").innerHTML = score;
+							}
+
+						}//collision hero & enemy
+
+
+						for(var j=0; j<enemy.length; j++){
+							for(var i=0; i<bullets.length; i++){
+								if(Math.abs(enemy[j].x - bullets[i].x)<50 && Math.abs(enemy[j].y - bullets[i].y)<50){								
+									score = score + 10;
+									audioExplode.play();
+								    document.getElementById("score").innerHTML = score;
+
+								    explode.push({x: enemy[j].x, y: enemy[j].y});
+									displayExplode();
+								    enemy[j].y =0;
+								    enemy[j].x =  Math.floor(Math.random()*1100)+100;
+								    bullets[i] = bullets[bullets.length-1];
+									bullets.pop();
+								}
+							}
+						}//collision enemy and bullet
+				}
+
+				document.onkeydown = function(e){
+					if(e.keyCode == 37){
+						hero.x -= 10;
+					}
+					else if(e.keyCode == 39){
+						hero.x += 10;
+					}
+					else if(e.keyCode == 38){
+						hero.y -= 10;
+					}
+					else if(e.keyCode == 40){
+						hero.y += 10;
+					}
+					else if(e.keyCode == 32){
+						bullets.push({x: hero.x, y: hero.y});
+						audioBullet.play();
+					}
+				}
+		</script>
+	</body>
+</html>
